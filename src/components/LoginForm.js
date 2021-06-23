@@ -1,10 +1,19 @@
-import React,{useState} from 'react'
+import React,{useState, useContext} from 'react'
 import { AiOutlineFacebook, AiOutlineInstagram, AiOutlineTwitter } from "react-icons/ai";
 import { FaUserCircle, FaEnvelope, FaLockOpen } from "react-icons/fa";
-
+import {useHistory, Redirect} from 'react-router-dom';
+import Axios from "axios"
+import { AuthContext } from '../context/authContext';
 function LoginForm() {
 
     const [newUser, setNewUser] = useState(false)
+    const [nameReg, setNameReg] = useState("")
+    const [emailReg, setEmailReg] = useState("")
+    const [passwordReg, setPasswordReg] = useState("")
+    const [email,setEmail] = useState("")
+    const [password,setPassword] = useState("")
+
+    const {loggedIn,getLoggedIn} = useContext(AuthContext)
 
     const newUserClick = ()=>{
         setNewUser(true)
@@ -14,11 +23,49 @@ function LoginForm() {
         setNewUser(false)
     }
 
+    let history = useHistory();
+
+    const register = async (e)=>{
+        e.preventDefault();
+
+        try {
+           const response = await Axios.post('http://localhost:3001/auth',{
+            name: nameReg,
+            email:emailReg,
+            password: passwordReg
+        });
+        await getLoggedIn();
+        history.push('/home')
+            
+        } catch (error) {
+            console.log(error);
+        }
+        
+    }
+
+    const login = async (e)=>{
+        e.preventDefault();
+
+        try {
+           const response = await Axios.post('http://localhost:3001/auth/login',{
+            email,
+            password
+        });
+        await getLoggedIn();
+        history.push('/home')    
+        } catch (error) {
+            console.log(error);
+        }
+        
+    }
+
+    console.log(nameReg, emailReg,passwordReg);
+
     return (
         <div className="max-w-max bg-white border-white rounded-sm 	ml-auto mr-auto mt-20 overflow-hidden">
             <div className="flex ">
                 <div className={`p-6  w-1/2  h-hcard ${newUser ? "overlay-signin" : ""}`}>
-                    <form className={`flex flex-col justify-center items-center p-3.5 ${newUser ? "hidden" : ""}`}>
+                    <form onSubmit={login} className={`flex flex-col justify-center items-center p-3.5 ${newUser ? "hidden" : ""}`}>
                         <h2 className="text-2xl text-signText mb-5">Sign in</h2>
                         <div className="mb-3">
                             <button type="button" className="bg-blue-800 mr-2 rounded-sm transform hover:-translate-y-0.5 hover:bg-blue-900 transition duration-300" >
@@ -37,7 +84,7 @@ function LoginForm() {
                                 <div className="bg-white  p-2.5">
                                     <span className="text-iconcolor"><FaEnvelope /></span>
                                 </div>
-                                <input placeholder="Email" type="email" className="p-2.5" />
+                                <input placeholder="Email" value={email} onChange={(e)=> setEmail(e.target.value)} type="email" className="p-2.5" />
                             </div>
                         </div>
                         <div className="">
@@ -45,7 +92,7 @@ function LoginForm() {
                                 <div className="bg-white p-2.5">
                                     <span className="text-iconcolor"><FaLockOpen /></span>
                                 </div>
-                                <input placeholder="Password" type="password" className="p-2.5" />
+                                <input placeholder="Password" type="password" value={password} onChange={(e)=> setPassword(e.target.value)} className="p-2.5" />
                             </div>
                         </div>
                         <a href="#" className="mb-4 text-gray-700 text-md">Forgot your password?</a> <br />
@@ -61,7 +108,7 @@ function LoginForm() {
                 </div>
                 {/* Sign up form */}
                 <div className={`p-6 w-1/2 ${newUser ? "" : "overlay-signin"} h-hcard`}>
-                    <form className={`flex flex-col justify-center items-center p-3.5 ${newUser ? "" : "hidden"}`}>
+                    <form onSubmit={register} className={`flex flex-col justify-center items-center p-3.5 ${newUser ? "" : "hidden"}`}>
                         <h2 className="text-2xl text-signText mb-5">Create Account</h2>
                         <div className="mb-3">
                             <button type="button" className="bg-blue-800 mr-2 rounded-sm transform hover:-translate-y-0.5 hover:bg-blue-900 transition duration-300" >
@@ -80,7 +127,7 @@ function LoginForm() {
                                 <div className="bg-white  p-2.5">
                                     <span className="text-iconcolor pt-auto"><FaUserCircle /></span>
                                 </div>
-                                <input placeholder="Name" className="p-2.5" type="text" />
+                                <input placeholder="Name" className="p-2.5" type="text" value={nameReg} onChange={(e)=>setNameReg(e.target.value)} />
                             </div>
                         </div>
                         <div>
@@ -88,7 +135,7 @@ function LoginForm() {
                                 <div className="bg-white  p-2.5">
                                     <span className="text-iconcolor"><FaEnvelope /></span>
                                 </div>
-                                <input placeholder="Email" type="email" className="p-2.5" />
+                                <input placeholder="Email" type="email" className="p-2.5" value={emailReg} onChange={(e)=>setEmailReg(e.target.value)} />
                             </div>
                         </div>
                         <div className="">
@@ -96,7 +143,7 @@ function LoginForm() {
                                 <div className="bg-white  p-2.5">
                                     <span className="text-iconcolor"><FaLockOpen /></span>
                                 </div>
-                                <input placeholder="Password" type="password" className="p-2.5" />
+                                <input placeholder="Password" type="password" className="p-2.5" value={passwordReg} onChange={(e)=>setPasswordReg(e.target.value)} />
                             </div>
                         </div>
                         <button className="border-blue-600 p-2 rounded-md uppercase font-medium bg-blue-600 text-white text-sm tracking-wide transform hover:-translate-y-0.5 hover:bg-blue-700 transition duration-300">Sign Up</button>
